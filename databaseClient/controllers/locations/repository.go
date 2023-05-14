@@ -3,7 +3,6 @@ package locations
 import (
 	"context"
 	"databaseClient/model"
-	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -24,43 +23,38 @@ func (r *repository) ResultLocationsRepository(input *LocationRequest) (*[]model
 
 	var locationsResult []model.Location
 
-	var longitude = input.Longitude
-	var latitude = input.Latitude
-	var distance = input.Distance
+	var sql = `
+		SELECT AMENITY,
+			NAME,
+			SHOP,
+			SPORT,
+			PUBLIC_TRANSPORT,
+			TAGS,
+			WATER,
+			LANDUSE
+		FROM PLANET_OSM_POINT
+		WHERE HIGHWAY IS NULL
+			AND RAILWAY IS NULL
+			AND POWER IS NULL
+			AND BARRIER IS NULL
+			AND (BUILDING != 'garage'
+								AND BUILDING != 'apartments'
+								OR BUILDING IS NULL)
+			AND (LANDUSE != 'grass'
+								OR LANDUSE IS NULL)
+			AND (SHOP IS NOT NULL
+								OR LEISURE IS NOT NULL
+								OR AMENITY IS NOT NULL
+								OR PUBLIC_TRANSPORT IS NOT NULL
+								OR WATER IS NOT NULL)
+		-- 	AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT(20.97954, 52.25052), 4326), 3857), 1000) = false
+			AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($1, $2), 4326), 3857), $3)
+	`
 
-	fmt.Println("Parameters: ", longitude, latitude, distance)
-
-	var sql = `SELECT AMENITY,
-	NAME,
-	SHOP,
-	SPORT,
-	PUBLIC_TRANSPORT,
-	TAGS,
-	WATER,
-	LANDUSE
-FROM PLANET_OSM_POINT
-WHERE HIGHWAY IS NULL
-	AND RAILWAY IS NULL
-	AND POWER IS NULL
-	AND BARRIER IS NULL
-	AND (BUILDING != 'garage'
-						AND BUILDING != 'apartments'
-						OR BUILDING IS NULL)
-	AND (LANDUSE != 'grass'
-						OR LANDUSE IS NULL)
-	AND (SHOP IS NOT NULL
-						OR LEISURE IS NOT NULL
-						OR AMENITY IS NOT NULL
-						OR PUBLIC_TRANSPORT IS NOT NULL
-						OR WATER IS NOT NULL)
--- 	AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT(20.97954, 52.25052), 4326), 3857), 1000) = false
-	AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($1, $2), 4326), 3857), $3) `
-
-	rows, _ := r.conn.Query(context.Background(), sql, longitude, latitude, distance)
+	rows, _ := r.conn.Query(context.Background(), sql, input.Longitude, input.Latitude, input.Distance)
 
 	for rows.Next() {
-		fmt.Println("IM HERE")
-		location, err := pgx.RowToAddrOfStructByName[model.Location](*&rows)
+		location, err := pgx.RowToAddrOfStructByName[model.Location](rows)
 		if err != nil {
 			return &locationsResult, err.Error()
 		}
