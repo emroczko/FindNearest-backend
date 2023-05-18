@@ -8,11 +8,23 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"log"
+	"strconv"
 )
 
 func main() {
+	setupConfigs()
 	router := setupRouter()
-	log.Fatal(router.Run("localhost:8080"))
+	log.Fatal(router.Run(config.AppConfig.Host + ":" + strconv.Itoa(config.AppConfig.Port)))
+}
+
+func setupConfigs() {
+	if err := config.InitializeAppConfig(); err != nil {
+		log.Fatal(err.Error())
+	}
+
+	if err := config.InitializeKnownLocationTypes(); err != nil {
+		log.Fatal(err.Error())
+	}
 }
 
 func setupRouter() *gin.Engine {
