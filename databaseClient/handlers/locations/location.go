@@ -35,7 +35,7 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 		return
 	}
 
-	resultStudent, err := h.service.ResultLocationsService(&input)
+	locations, err := h.service.ResultLocationsService(&input)
 
 	if len(err) != 0 {
 		log.Fatal(err)
@@ -48,6 +48,6 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 	//	return
 	//
 	//default:
-	util.APIResponse(ctx, "Result Student data successfully", http.StatusOK, http.MethodGet, resultStudent)
+	util.APIResponse(ctx, "Result Student data successfully", http.StatusOK, http.MethodGet, locations)
 	//}
 }

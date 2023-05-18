@@ -42,16 +42,17 @@ func (r *repository) ResultLocationsRepository(input *LocationRequest) (*[]model
 								OR BUILDING IS NULL)
 			AND (LANDUSE != 'grass'
 								OR LANDUSE IS NULL)
-			AND (SHOP IS NOT NULL
-								OR LEISURE IS NOT NULL
-								OR AMENITY IS NOT NULL
-								OR PUBLIC_TRANSPORT IS NOT NULL
-								OR WATER IS NOT NULL)
+			AND (SHOP = $1
+								OR LEISURE = $1
+								OR PUBLIC_TRANSPORT = $1
+			         			OR AMENITY = $1
+								OR WATER = $1)
+			AND NOT ((NAME IS NULL OR NAME = '') AND (TAGS IS NULL OR TAGS = ''))
 		-- 	AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT(20.97954, 52.25052), 4326), 3857), 1000) = false
-			AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($1, $2), 4326), 3857), $3)
+			AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 3857), $4)
 	`
 
-	rows, _ := r.conn.Query(context.Background(), sql, input.Longitude, input.Latitude, input.Distance)
+	rows, _ := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.Distance)
 
 	for rows.Next() {
 		location, err := pgx.RowToAddrOfStructByName[model.Location](rows)
