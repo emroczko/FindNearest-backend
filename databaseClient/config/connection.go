@@ -8,7 +8,8 @@ import (
 
 func Connection() *pgxpool.Pool {
 
-	poolConfig, err := pgxpool.ParseConfig("")
+	connectionString := "postgres://" + AppConfig.DBUser + ":" + AppConfig.DBPassword + "@" + AppConfig.DBHost + ":" + AppConfig.DBPort + "/" + AppConfig.DBDatabase
+	poolConfig, err := pgxpool.ParseConfig(connectionString)
 	if err != nil {
 		log.Fatalln("Unable to parse DATABASE_URL:", err)
 	}
