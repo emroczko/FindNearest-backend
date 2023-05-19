@@ -21,15 +21,6 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 
 	var input resultLocation.LocationRequest
 
-	//input.Distance = ctx.GetFloat64("distance")
-
-	//errResponse, errCount := util.GoValidator(&input, config.Options)
-	//
-	//if errCount > 0 {
-	//	util.ValidatorErrorResponse(ctx, http.StatusBadRequest, http.MethodGet, errResponse)
-	//	return
-	//}
-
 	if err := ctx.BindJSON(&input); err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
