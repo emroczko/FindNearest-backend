@@ -159,6 +159,7 @@ locationTypes:
     - rental
     - repair
     - rescue_station
+    - restaurant
     - retail
     - robot
     - safe

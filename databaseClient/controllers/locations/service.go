@@ -20,11 +20,16 @@ func NewServiceResult(repository Repository) *service {
 
 func (s *service) ResultLocationsService(request *LocationRequest) (*[]model.Location, string) {
 
-	locationsResults, err := s.repository.ResultLocationsRepository(request)
+	pointLocationResults, err := s.repository.PointLocationsRepository(request)
+	polygonsLocationsResults, err := s.repository.PolygonLocationsRepository(request)
 
 	fmt.Println(request)
+	fmt.Println(pointLocationResults)
+	fmt.Println(polygonsLocationsResults)
 
-	return locationsResults, err
+	result := append(*pointLocationResults, *polygonsLocationsResults...)
+
+	return &result, err
 }
 
 func resolveLocationType(requestLocationType string) string {

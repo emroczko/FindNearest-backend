@@ -3,6 +3,7 @@ package locationsHandler
 import (
 	resultLocation "databaseClient/controllers/locations"
 	"databaseClient/util"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -30,7 +31,7 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 	//}
 
 	if err := ctx.BindJSON(&input); err != nil {
-
+		fmt.Println(input)
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
