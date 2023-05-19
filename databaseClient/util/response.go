@@ -4,41 +4,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Responses struct {
-	StatusCode int         `json:"statusCode"`
-	Method     string      `json:"method"`
-	Message    string      `json:"message"`
-	Data       interface{} `json:"data"`
-}
-
 type ErrorResponse struct {
-	StatusCode int         `json:"statusCode"`
-	Method     string      `json:"method"`
-	Error      interface{} `json:"error"`
+	Error interface{} `json:"message"`
 }
 
-func APIResponse(ctx *gin.Context, Message string, StatusCode int, Method string, Data interface{}) {
-
-	jsonResponse := Responses{
-		StatusCode: StatusCode,
-		Method:     Method,
-		Message:    Message,
-		Data:       Data,
-	}
+func APIResponse(ctx *gin.Context, StatusCode int, Data interface{}) {
 
 	if StatusCode >= 400 {
-		ctx.JSON(StatusCode, jsonResponse)
+		ctx.JSON(StatusCode, Data)
 		defer ctx.AbortWithStatus(StatusCode)
 	} else {
-		ctx.JSON(StatusCode, jsonResponse)
+		ctx.JSON(StatusCode, Data)
 	}
 }
 
-func ValidatorErrorResponse(ctx *gin.Context, StatusCode int, Method string, Error interface{}) {
+func CreateErrorResponse(ctx *gin.Context, StatusCode int, Error interface{}) {
 	errResponse := ErrorResponse{
-		StatusCode: StatusCode,
-		Method:     Method,
-		Error:      Error,
+		Error: Error,
 	}
 
 	ctx.JSON(StatusCode, errResponse)

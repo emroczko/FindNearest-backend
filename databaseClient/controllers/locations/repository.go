@@ -27,7 +27,7 @@ func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.
 
 	sql := createQuery("PLANET_OSM_POINT")
 
-	rows, _ := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
+	rows, queryErr := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
 
 	for rows.Next() {
 		location, err := pgx.RowToAddrOfStructByName[model.Location](rows)
@@ -38,7 +38,7 @@ func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.
 		locationsResult = append(locationsResult, *location)
 	}
 
-	return &locationsResult, ""
+	return &locationsResult, queryErr.Error()
 }
 
 func (r *repository) PolygonLocationsRepository(input *LocationRequest) (*[]model.Location, string) {
@@ -47,7 +47,7 @@ func (r *repository) PolygonLocationsRepository(input *LocationRequest) (*[]mode
 
 	sql := createQuery("PLANET_OSM_POLYGON")
 
-	rows, _ := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
+	rows, queryErr := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
 
 	for rows.Next() {
 		location, err := pgx.RowToAddrOfStructByName[model.Location](rows)
@@ -58,7 +58,7 @@ func (r *repository) PolygonLocationsRepository(input *LocationRequest) (*[]mode
 		locationsResult = append(locationsResult, *location)
 	}
 
-	return &locationsResult, ""
+	return &locationsResult, queryErr.Error()
 }
 
 func createQuery(tableName string) string {

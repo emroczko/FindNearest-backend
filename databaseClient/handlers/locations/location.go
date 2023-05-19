@@ -1,11 +1,11 @@
 package locationsHandler
 
 import (
+	"databaseClient/config"
 	resultLocation "databaseClient/controllers/locations"
 	"databaseClient/util"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
@@ -31,7 +31,6 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 	//}
 
 	if err := ctx.BindJSON(&input); err != nil {
-		fmt.Println(input)
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
@@ -39,16 +38,22 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 	locations, err := h.service.ResultLocationsService(&input)
 
 	if len(err) != 0 {
-		log.Fatal(err)
+		util.CreateErrorResponse(ctx, http.StatusInternalServerError, err)
+		fmt.Println(err)
 	}
 
-	//switch errResultStudent {
-	//
-	//case "RESULT_STUDENT_NOT_FOUND_404":
-	//	util.APIResponse(ctx, "Student data is not exist or deleted", http.StatusNotFound, http.MethodGet, nil)
-	//	return
-	//
-	//default:
-	util.APIResponse(ctx, "Result Student data successfully", http.StatusOK, http.MethodGet, locations)
-	//}
+	if len(*locations) == 0 {
+		util.APIResponse(ctx, http.StatusNotFound, locations)
+	} else {
+		util.APIResponse(ctx, http.StatusOK, locations)
+	}
+}
+
+func resolveLocationType(requestLocationType string) string {
+	for _, locationType := range config.LocationsTypesConfig.LocationTypes {
+		if requestLocationType == locationType {
+			return locationType
+		}
+	}
+	return ""
 }

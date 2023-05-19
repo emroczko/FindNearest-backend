@@ -17,5 +17,5 @@ func NewHandlerResultLocation(service resultLocation.Service) *Handler {
 
 func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 	locationsTypes := h.service.ResultLocationsTypesService()
-	util.APIResponse(ctx, "Locations types data returned successfully", http.StatusOK, http.MethodGet, locationsTypes)
+	util.APIResponse(ctx, http.StatusOK, locationsTypes)
 }
