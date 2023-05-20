@@ -3,8 +3,8 @@ package locationsHandler
 import (
 	"databaseClient/config"
 	resultLocation "databaseClient/controllers/locations"
+	"databaseClient/model"
 	"databaseClient/util"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -28,13 +28,13 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 
 	locations, err := h.service.ResultLocationsService(&input)
 
-	if len(err) != 0 {
+	if err != nil {
 		util.CreateErrorResponse(ctx, http.StatusInternalServerError, err)
-		fmt.Println(err)
+		return
 	}
 
 	if len(*locations) == 0 {
-		util.APIResponse(ctx, http.StatusNotFound, locations)
+		util.APIResponse(ctx, http.StatusNotFound, []model.Location{})
 	} else {
 		util.APIResponse(ctx, http.StatusOK, locations)
 	}

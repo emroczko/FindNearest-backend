@@ -5,7 +5,7 @@ import (
 )
 
 type Service interface {
-	ResultLocationsService(input *LocationRequest) (*[]model.Location, string)
+	ResultLocationsService(input *LocationRequest) (*[]model.Location, error)
 }
 
 type service struct {
@@ -16,12 +16,20 @@ func NewServiceResult(repository Repository) *service {
 	return &service{repository: repository}
 }
 
-func (s *service) ResultLocationsService(request *LocationRequest) (*[]model.Location, string) {
+func (s *service) ResultLocationsService(request *LocationRequest) (*[]model.Location, error) {
 
 	pointLocationResults, err := s.repository.PointLocationsRepository(request)
+
+	if err != nil {
+		return nil, err
+	}
+
 	polygonsLocationsResults, err := s.repository.PolygonLocationsRepository(request)
 
-	result := append(*pointLocationResults, *polygonsLocationsResults...)
+	if err != nil {
+		return nil, err
+	}
 
-	return &result, err
+	result := append(*pointLocationResults, *polygonsLocationsResults...)
+	return &result, nil
 }
