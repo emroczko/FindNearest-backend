@@ -1,7 +1,7 @@
 
 .DS_Store
 databaseClient/.idea
-databaseClient/.env
 routingClient/.idea
+routingClient/target
 routingClient/build
 routingClient/.gradle
