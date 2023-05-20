@@ -12,12 +12,9 @@ import java.util.Locale;
 
 @Service
 public class RouteService {
-
-    private GraphHopperConfiguration graphHopperConfiguration;
-    private GraphHopper hopper;
+    private final GraphHopper hopper;
 
     public RouteService(GraphHopperConfiguration graphHopperConfiguration) {
-        this.graphHopperConfiguration = graphHopperConfiguration;
         this.hopper = graphHopperConfiguration.create();
     }
 
