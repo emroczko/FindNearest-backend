@@ -1,5 +1,9 @@
 package model
 
+import (
+	"databaseClient/util"
+)
+
 type Location struct {
 	Amenity          *string
 	Name             *string
@@ -9,4 +13,5 @@ type Location struct {
 	Tags             *string
 	Water            *string
 	Landuse          *string
+	Coordinates      *util.Coordinates
 }
