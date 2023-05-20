@@ -1,0 +1,1 @@
+package locations_types
