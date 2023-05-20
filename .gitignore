@@ -5,3 +5,4 @@ routingClient/.idea
 routingClient/target
 routingClient/build
 routingClient/.gradle
+databaseClient/.env
