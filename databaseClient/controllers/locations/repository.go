@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirupsen/logrus"
 )
 
 type Repository interface {
-	PointLocationsRepository(input *LocationRequest) (*[]model.Location, string)
-	PolygonLocationsRepository(input *LocationRequest) (*[]model.Location, string)
+	PointLocationsRepository(input *LocationRequest) (*[]model.Location, error)
+	PolygonLocationsRepository(input *LocationRequest) (*[]model.Location, error)
 }
 
 type repository struct {
@@ -21,47 +22,68 @@ func NewRepositoryResult(conn *pgxpool.Pool) *repository {
 	return &repository{conn: conn}
 }
 
-func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.Location, string) {
+func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.Location, error) {
 
 	var locationsResult []model.Location
 
-	sql := createQuery("PLANET_OSM_POINT")
+	sql := createQuery(POINTS)
 
-	rows, queryErr := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
+	rows, err := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
+
+	if err != nil {
+		logrus.Error("Database error:", err.Error())
+		return nil, err
+	}
 
 	for rows.Next() {
 		location, err := pgx.RowToAddrOfStructByName[model.Location](rows)
 		if err != nil {
-			return &locationsResult, err.Error()
+			logrus.Error("Parsing database data error:", err.Error())
+			return &locationsResult, err
 		}
 
 		locationsResult = append(locationsResult, *location)
 	}
 
-	return &locationsResult, queryErr.Error()
+	return &locationsResult, nil
 }
 
-func (r *repository) PolygonLocationsRepository(input *LocationRequest) (*[]model.Location, string) {
+func (r *repository) PolygonLocationsRepository(input *LocationRequest) (*[]model.Location, error) {
 
 	var locationsResult []model.Location
 
-	sql := createQuery("PLANET_OSM_POLYGON")
+	sql := createQuery(POLYGONS)
 
-	rows, queryErr := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
+	rows, err := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
+
+	if err != nil {
+		logrus.Error("Database error: ", err.Error())
+		return nil, err
+	}
 
 	for rows.Next() {
 		location, err := pgx.RowToAddrOfStructByName[model.Location](rows)
 		if err != nil {
-			return &locationsResult, err.Error()
+			logrus.Error("Parsing database data error: ", err.Error())
+			return &locationsResult, err
 		}
 
 		locationsResult = append(locationsResult, *location)
 	}
 
-	return &locationsResult, queryErr.Error()
+	return &locationsResult, err
 }
 
-func createQuery(tableName string) string {
+func createQuery(tableName TABLE) string {
+
+	var geometryColumn string
+
+	if tableName == POLYGONS {
+		geometryColumn = "ST_AsText(ST_PointN(ST_Exteriorring(ST_Transform(WAY, 4326)), 1)) AS COORDINATES"
+	} else {
+		geometryColumn = "ST_AsText(ST_Transform(WAY, 4326)) AS COORDINATES"
+	}
+
 	sql := fmt.Sprintf(`
 		SELECT AMENITY,
 			NAME,
@@ -70,7 +92,8 @@ func createQuery(tableName string) string {
 			PUBLIC_TRANSPORT,
 			TAGS,
 			WATER,
-			LANDUSE
+			LANDUSE,
+			%s
 		FROM %s
 		WHERE HIGHWAY IS NULL
 			AND RAILWAY IS NULL
@@ -89,7 +112,14 @@ func createQuery(tableName string) string {
 			AND NOT ((NAME IS NULL OR NAME = '') AND (TAGS IS NULL OR TAGS = ''))
 			AND ($4 = 0 OR ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 3857), $4) = false)
 			AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 3857), $5)
-	`, tableName)
+	`, geometryColumn, tableName)
 
 	return sql
 }
+
+type TABLE string
+
+const (
+	POINTS   TABLE = "PLANET_OSM_POINT"
+	POLYGONS TABLE = "PLANET_OSM_POLYGON"
+)

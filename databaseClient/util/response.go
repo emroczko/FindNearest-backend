@@ -5,7 +5,7 @@ import (
 )
 
 type ErrorResponse struct {
-	Error interface{} `json:"message"`
+	Message string `json:"message"`
 }
 
 func APIResponse(ctx *gin.Context, StatusCode int, Data interface{}) {
@@ -18,11 +18,19 @@ func APIResponse(ctx *gin.Context, StatusCode int, Data interface{}) {
 	}
 }
 
-func CreateErrorResponse(ctx *gin.Context, StatusCode int, Error interface{}) {
-	errResponse := ErrorResponse{
-		Error: Error,
+func CreateErrorResponse(ctx *gin.Context, statusCode int, error error) {
+
+	var message string
+	if statusCode == 500 {
+		message = "Internal server error"
+	} else {
+		message = error.Error()
 	}
 
-	ctx.JSON(StatusCode, errResponse)
-	defer ctx.AbortWithStatus(StatusCode)
+	errResponse := ErrorResponse{
+		Message: message,
+	}
+
+	ctx.JSON(statusCode, errResponse)
+	defer ctx.AbortWithStatus(statusCode)
 }
