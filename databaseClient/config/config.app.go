@@ -8,9 +8,8 @@ import (
 var AppConfig Config
 
 type Config struct {
-	Port        string `mapstructure:"GO_PORT"`
-	Host        string `mapstructure:"GO_HOST"`
-	Environment string `mapstructure:"GO_ENV"`
+	Port        string `mapstructure:"PORT"`
+	Environment string `mapstructure:"ENV"`
 
 	DBHost     string `mapstructure:"DB_PSQL_HOST"`
 	DBPort     string `mapstructure:"DB_PSQL_PORT"`
