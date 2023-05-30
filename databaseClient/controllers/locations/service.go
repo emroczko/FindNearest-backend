@@ -5,7 +5,7 @@ import (
 )
 
 type Service interface {
-	ResultLocationsService(input *LocationRequest) (*model.PagedLocation, error)
+	ResultLocationsService(input *model.LocationRequest) (*model.PagedLocation, error)
 }
 
 type service struct {
@@ -16,7 +16,7 @@ func NewServiceResult(repository Repository) *service {
 	return &service{repository: repository}
 }
 
-func (s *service) ResultLocationsService(request *LocationRequest) (*model.PagedLocation, error) {
+func (s *service) ResultLocationsService(request *model.LocationRequest) (*model.PagedLocation, error) {
 
 	pointLocationResults, err := s.repository.PointLocationsRepository(request)
 
@@ -39,9 +39,9 @@ func (s *service) ResultLocationsService(request *LocationRequest) (*model.Paged
 
 	for _, loc := range result {
 		location := model.Location{
-			Coordinates: *loc.Coordinates,
-			Name:        *loc.Name,
-			Amenity:     *loc.Amenity,
+			Coordinates:  *loc.Coordinates,
+			Name:         *loc.Name,
+			LocationType: *loc.Amenity,
 		}
 		pagedResults.Locations = append(pagedResults.Locations, location)
 	}

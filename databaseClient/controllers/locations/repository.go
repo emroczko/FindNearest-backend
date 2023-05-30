@@ -10,8 +10,8 @@ import (
 )
 
 type Repository interface {
-	PointLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error)
-	PolygonLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error)
+	PointLocationsRepository(input *model.LocationRequest) (*[]model.LocationEntity, error)
+	PolygonLocationsRepository(input *model.LocationRequest) (*[]model.LocationEntity, error)
 }
 
 type repository struct {
@@ -22,7 +22,7 @@ func NewRepositoryResult(conn *pgxpool.Pool) *repository {
 	return &repository{conn: conn}
 }
 
-func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error) {
+func (r *repository) PointLocationsRepository(input *model.LocationRequest) (*[]model.LocationEntity, error) {
 
 	var locationsResult []model.LocationEntity
 
@@ -48,7 +48,7 @@ func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.
 	return &locationsResult, nil
 }
 
-func (r *repository) PolygonLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error) {
+func (r *repository) PolygonLocationsRepository(input *model.LocationRequest) (*[]model.LocationEntity, error) {
 
 	var locationsResult []model.LocationEntity
 

@@ -1,4 +1,4 @@
-package locations
+package model
 
 type LocationRequest struct {
 	Latitude    float64 `form:"latitude" binding:"required"`

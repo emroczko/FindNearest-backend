@@ -20,7 +20,7 @@ func NewHandlerResultLocation(service resultLocation.Service) *Handler {
 
 func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 
-	var input resultLocation.LocationRequest
+	var input model.LocationRequest
 
 	if err := ctx.ShouldBindQuery(&input); err != nil {
 		util.CreateErrorResponse(ctx, http.StatusBadRequest, err)
