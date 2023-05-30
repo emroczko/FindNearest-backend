@@ -10,8 +10,8 @@ import (
 )
 
 type Repository interface {
-	PointLocationsRepository(input *LocationRequest) (*[]model.Location, error)
-	PolygonLocationsRepository(input *LocationRequest) (*[]model.Location, error)
+	PointLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error)
+	PolygonLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error)
 }
 
 type repository struct {
@@ -22,9 +22,9 @@ func NewRepositoryResult(conn *pgxpool.Pool) *repository {
 	return &repository{conn: conn}
 }
 
-func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.Location, error) {
+func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error) {
 
-	var locationsResult []model.Location
+	var locationsResult []model.LocationEntity
 
 	sql := createQuery(POINTS)
 
@@ -36,7 +36,7 @@ func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.
 	}
 
 	for rows.Next() {
-		location, err := pgx.RowToAddrOfStructByName[model.Location](rows)
+		location, err := pgx.RowToAddrOfStructByName[model.LocationEntity](rows)
 		if err != nil {
 			logrus.Error("Parsing database data error:", err.Error())
 			return &locationsResult, err
@@ -48,9 +48,9 @@ func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.
 	return &locationsResult, nil
 }
 
-func (r *repository) PolygonLocationsRepository(input *LocationRequest) (*[]model.Location, error) {
+func (r *repository) PolygonLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error) {
 
-	var locationsResult []model.Location
+	var locationsResult []model.LocationEntity
 
 	sql := createQuery(POLYGONS)
 
@@ -62,7 +62,7 @@ func (r *repository) PolygonLocationsRepository(input *LocationRequest) (*[]mode
 	}
 
 	for rows.Next() {
-		location, err := pgx.RowToAddrOfStructByName[model.Location](rows)
+		location, err := pgx.RowToAddrOfStructByName[model.LocationEntity](rows)
 		if err != nil {
 			logrus.Error("Parsing database data error: ", err.Error())
 			return &locationsResult, err

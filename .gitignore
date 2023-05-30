@@ -6,3 +6,4 @@ routingClient/target
 routingClient/build
 routingClient/.gradle
 databaseClient/.env
+databaseClient/.env.docker

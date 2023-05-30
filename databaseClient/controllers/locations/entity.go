@@ -1,9 +1,9 @@
 package locations
 
 type LocationRequest struct {
-	Latitude    float64 `json:"latitude" binding:"required"`
-	Longitude   float64 `json:"longitude" binding:"required"`
-	Type        string  `json:"type" binding:"required"`
-	RadiusStart float64 `json:"radiusStart"`
-	RadiusEnd   float64 `json:"radiusEnd" binding:"required"`
+	Latitude    float64 `form:"latitude" binding:"required"`
+	Longitude   float64 `form:"longitude" binding:"required"`
+	Type        string  `form:"type" binding:"required"`
+	RadiusStart float64 `form:"radiusStart" binding:"min=0"`
+	RadiusEnd   float64 `form:"radiusEnd" binding:"required,max=5000"`
 }

@@ -5,6 +5,7 @@ import (
 	resultLocation "databaseClient/controllers/locations"
 	"databaseClient/model"
 	"databaseClient/util"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -21,11 +22,12 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 
 	var input resultLocation.LocationRequest
 
-	if err := ctx.BindJSON(&input); err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
+	if err := ctx.ShouldBindQuery(&input); err != nil {
+		util.CreateErrorResponse(ctx, http.StatusBadRequest, err)
 		return
 	}
 
+	fmt.Println(input)
 	locations, err := h.service.ResultLocationsService(&input)
 
 	if err != nil {
@@ -33,8 +35,8 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 		return
 	}
 
-	if len(*locations) == 0 {
-		util.APIResponse(ctx, http.StatusNotFound, []model.Location{})
+	if len(locations.Locations) == 0 {
+		util.APIResponse(ctx, http.StatusNotFound, []model.LocationEntity{})
 	} else {
 		util.APIResponse(ctx, http.StatusOK, locations)
 	}
