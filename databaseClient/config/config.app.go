@@ -1,17 +1,15 @@
 package config
 
 import (
-	constants "databaseClient/util/constants"
+	"databaseClient/util/constants"
 	"github.com/spf13/viper"
-	"log"
 )
 
 var AppConfig Config
 
 type Config struct {
-	Port        int    `mapstructure:"PORT"`
-	Host        string `mapstructure:"HOST"`
-	Environment string `mapstructure:"ENVIRONMENT"`
+	Port        string `mapstructure:"PORT"`
+	Environment string `mapstructure:"ENV"`
 
 	DBHost     string `mapstructure:"DB_PSQL_HOST"`
 	DBPort     string `mapstructure:"DB_PSQL_PORT"`
@@ -25,24 +23,39 @@ func InitializeAppConfig() error {
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
 	viper.AutomaticEnv()
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal(err.Error())
-		return constants.LoadEnvsError
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			if bindErr := viper.BindStruct(&AppConfig); bindErr != nil {
+				return constants.LoadEnvsError
+			}
+		} else {
+			return constants.ParseConfigError
+		}
 	}
 
-	err = viper.Unmarshal(&AppConfig)
-	if err != nil {
+	if err := viper.Unmarshal(&AppConfig); err != nil {
 		return constants.ParseConfigError
-	}
-
-	if AppConfig.Port == 0 || AppConfig.Environment == "" {
-		return constants.EmptyEnvVarError
-	}
-
-	if AppConfig.DBUser == "" || AppConfig.DBPassword == "" {
-		return constants.EmptyEnvVarError
 	}
 
 	return nil
 }
+
+//func GetFromEnv() error {
+//
+//	AppConfig.Host = util.GetEnv("GO_HOST")
+//	AppConfig.Port = util.GetEnv("GO_PORT")
+//	AppConfig.Environment = util.GetEnv("GO_PORT")
+//
+//	AppConfig.DBHost = util.GetEnv("DB_PSQL_HOST")
+//	AppConfig.DBPort = util.GetEnv("DB_PSQL_PORT")
+//	AppConfig.DBUser = util.GetEnv("DB_PSQL_USERNAME")
+//	AppConfig.DBPassword = util.GetEnv("DB_PSQL_PASSWORD")
+//	AppConfig.DBDatabase = util.GetEnv("DB_PSQL_DATABASE")
+//
+//	validate = validator.New()
+//
+//	err := validate.Struct(AppConfig)
+//	if err != nil {
+//		return err
+//	}
+//}

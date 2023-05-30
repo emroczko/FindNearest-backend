@@ -1,10 +1,9 @@
-package util
+package model
 
 import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 )
@@ -28,9 +27,8 @@ func (p *Coordinates) Scan(value interface{}) error {
 	if !ok {
 		return fmt.Errorf("Coordinates.Scan: expected string, got %T (%v)", value, value)
 	}
-	logrus.Info("ELO: ", v)
+
 	coords := strings.TrimLeft(strings.TrimRight(v, ")"), "POINT(")
-	logrus.Info(coords)
 
 	longitude, err := strconv.ParseFloat(strings.Split(coords, " ")[0], 64)
 	if err != nil {

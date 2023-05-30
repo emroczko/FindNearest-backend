@@ -8,13 +8,12 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"log"
-	"strconv"
 )
 
 func main() {
 	setupConfigs()
 	router := setupRouter()
-	log.Fatal(router.Run(config.AppConfig.Host + ":" + strconv.Itoa(config.AppConfig.Port)))
+	log.Fatal(router.Run(":" + config.AppConfig.Port))
 }
 
 func setupConfigs() {
