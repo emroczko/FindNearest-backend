@@ -35,7 +35,7 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 		return
 	}
 
-	if len(locations.Locations) == 0 {
+	if len(*locations.Locations) == 0 {
 		util.APIResponse(ctx, http.StatusNotFound, []model.LocationEntity{})
 	} else {
 		util.APIResponse(ctx, http.StatusOK, locations)

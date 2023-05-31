@@ -7,6 +7,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
+	"log"
+	"time"
 )
 
 type Repository interface {
@@ -28,7 +30,10 @@ func (r *repository) PointLocationsRepository(input *model.LocationRequest) (*[]
 
 	sql := createQuery(POINTS)
 
+	start := time.Now()
 	rows, err := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
+	elapsed := time.Since(start)
+	log.Printf("Query to points table took %s", elapsed)
 
 	if err != nil {
 		logrus.Error("Database error:", err.Error())
@@ -54,7 +59,10 @@ func (r *repository) PolygonLocationsRepository(input *model.LocationRequest) (*
 
 	sql := createQuery(POLYGONS)
 
+	start := time.Now()
 	rows, err := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
+	elapsed := time.Since(start)
+	log.Printf("Query to polygon table took %s", elapsed)
 
 	if err != nil {
 		logrus.Error("Database error: ", err.Error())

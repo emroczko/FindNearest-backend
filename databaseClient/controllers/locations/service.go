@@ -34,17 +34,19 @@ func (s *service) ResultLocationsService(request *model.LocationRequest) (*model
 
 	var pagedResults model.PagedLocation
 
-	pagedResults.PageNumber = 0
-	pagedResults.PagesCount = 0
+	pagedResults.RadiusEnd = &request.RadiusEnd
+	var locations []model.Location
 
 	for _, loc := range result {
 		location := model.Location{
-			Coordinates:  *loc.Coordinates,
-			Name:         *loc.Name,
-			LocationType: *loc.Amenity,
+			Coordinates:  loc.Coordinates,
+			Name:         loc.Name,
+			LocationType: loc.Amenity,
 		}
-		pagedResults.Locations = append(pagedResults.Locations, location)
+		locations = append(locations, location)
 	}
+
+	pagedResults.Locations = &locations
 
 	return &pagedResults, nil
 }
