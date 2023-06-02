@@ -5,8 +5,8 @@ import (
 	resultLocation "databaseClient/controllers/locations"
 	"databaseClient/model"
 	"databaseClient/util"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -20,22 +20,22 @@ func NewHandlerResultLocation(service resultLocation.Service) *Handler {
 
 func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 
-	var input model.LocationRequest
+	var input *model.LocationByDistanceRequest
 
-	if err := ctx.ShouldBindQuery(&input); err != nil {
+	if err := ctx.ShouldBindJSON(&input); err != nil {
 		util.CreateErrorResponse(ctx, http.StatusBadRequest, err)
 		return
 	}
 
-	fmt.Println(input)
-	locations, err := h.service.ResultLocationsService(&input)
+	logrus.Info("Request: ", *input.Latitude, *input.Longitude, *input.MainLocation.Type)
+	locations, err := h.service.ResultLocationsService(input)
 
 	if err != nil {
 		util.CreateErrorResponse(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
-	if len(*locations.Locations) == 0 {
+	if len(*locations.MainLocations) == 0 {
 		util.APIResponse(ctx, http.StatusNotFound, []model.LocationEntity{})
 	} else {
 		util.APIResponse(ctx, http.StatusOK, locations)

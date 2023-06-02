@@ -1,8 +1,10 @@
 package model
 
 type PagedLocation struct {
-	RadiusEnd *float64    `json:"radiusEnd"`
-	Locations *[]Location `json:"locations"`
+	MainLocationsRadiusEnd       *float64    `json:"mainLocationsRadiusEnd"`
+	AdditionalLocationsRadiusEnd *float64    `json:"additionalLocationsRadiusEnd"`
+	MainLocations                *[]Location `json:"mainLocations"`
+	AdditionalLocations          *[]Location `json:"additionalLocations"`
 }
 
 type Location struct {
