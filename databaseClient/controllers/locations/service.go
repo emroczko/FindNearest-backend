@@ -7,7 +7,8 @@ import (
 )
 
 type Service interface {
-	ResultLocationsService(input *model.LocationByDistanceRequest) (*model.PagedLocation, error)
+	GetLocationsByDistance(input *model.LocationByDistanceRequest) (*model.PagedLocation, error)
+	GetLocationsByTime(input *model.LocationByTimeRequest) (*model.PagedLocation, error)
 }
 
 type service struct {
@@ -18,7 +19,7 @@ func NewServiceResult(repository Repository) *service {
 	return &service{repository: repository}
 }
 
-func (s *service) ResultLocationsService(request *model.LocationByDistanceRequest) (*model.PagedLocation, error) {
+func (s *service) GetLocationsByDistance(request *model.LocationByDistanceRequest) (*model.PagedLocation, error) {
 
 	mainLocationsQueryData := convertQueryParameters(*request.MainLocation)
 	var pagedResults model.PagedLocation
@@ -102,6 +103,10 @@ func (s *service) ResultLocationsService(request *model.LocationByDistanceReques
 	}
 
 	return &pagedResults, nil
+}
+
+func (s *service) GetLocationsByTime(request *model.LocationByTimeRequest) (*model.PagedLocation, error) {
+	return nil, nil
 }
 
 func convertQueryParameters(request model.LocationByDistanceRequestDetails) *model.LocationQuery {

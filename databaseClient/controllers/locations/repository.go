@@ -52,7 +52,7 @@ func (r *repository) GetMainLocations(input *model.LocationQuery) (*[]model.Loca
 	start := time.Now()
 	rows, err := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
 	elapsed := time.Since(start)
-	log.Printf("Main locations query took %s", elapsed)
+	log.Printf("Main locations.by.distance query took %s", elapsed)
 
 	if err != nil {
 		logrus.Error("Database error:", err.Error())

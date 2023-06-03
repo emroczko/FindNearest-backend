@@ -1,7 +1,6 @@
-package locationsHandler
+package locations_by_time
 
 import (
-	"databaseClient/config"
 	resultLocation "databaseClient/controllers/locations"
 	"databaseClient/model"
 	"databaseClient/util"
@@ -14,13 +13,13 @@ type Handler struct {
 	service resultLocation.Service
 }
 
-func NewHandlerResultLocation(service resultLocation.Service) *Handler {
+func NewHandlerLocationByTime(service resultLocation.Service) *Handler {
 	return &Handler{service: service}
 }
 
-func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
+func (h *Handler) GetLocationsByTime(ctx *gin.Context) {
 
-	var input *model.LocationByDistanceRequest
+	var input *model.LocationByTimeRequest
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		util.CreateErrorResponse(ctx, http.StatusBadRequest, err)
@@ -28,7 +27,7 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 	}
 
 	logrus.Info("Request: ", *input.Latitude, *input.Longitude, *input.MainLocation.Type)
-	locations, err := h.service.ResultLocationsService(input)
+	locations, err := h.service.GetLocationsByTime(input)
 
 	if err != nil {
 		util.CreateErrorResponse(ctx, http.StatusInternalServerError, err)
@@ -40,13 +39,4 @@ func (h *Handler) ResultLocationHandler(ctx *gin.Context) {
 	} else {
 		util.APIResponse(ctx, http.StatusOK, locations)
 	}
-}
-
-func resolveLocationType(requestLocationType string) string {
-	for _, locationType := range config.LocationsTypesConfig.LocationTypes {
-		if requestLocationType == locationType {
-			return locationType
-		}
-	}
-	return ""
 }
