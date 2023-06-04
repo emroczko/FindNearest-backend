@@ -23,6 +23,8 @@ func (h *Handler) GetLocationsByDistance(ctx *gin.Context) {
 	var input *model.LocationByDistanceRequest
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
+		logrus.Error(&ctx.Request.Body)
+		logrus.Error(err)
 		util.CreateErrorResponse(ctx, http.StatusBadRequest, err)
 		return
 	}
@@ -31,15 +33,12 @@ func (h *Handler) GetLocationsByDistance(ctx *gin.Context) {
 	locations, err := h.service.GetLocationsByDistance(input)
 
 	if err != nil {
+		logrus.Error(err)
 		util.CreateErrorResponse(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
-	if len(*locations.MainLocations) == 0 {
-		util.APIResponse(ctx, http.StatusNotFound, []model.LocationEntity{})
-	} else {
-		util.APIResponse(ctx, http.StatusOK, locations)
-	}
+	util.APIResponse(ctx, http.StatusOK, locations)
 }
 
 func resolveLocationType(requestLocationType string) string {
