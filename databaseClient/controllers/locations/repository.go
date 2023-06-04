@@ -3,32 +3,56 @@ package locations
 import (
 	"context"
 	"databaseClient/model"
-	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
+	"log"
+	"time"
 )
 
 type Repository interface {
-	PointLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error)
-	PolygonLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error)
+	GetMainLocations(input *model.LocationQuery) (*[]model.LocationEntity, error)
+	GetAdditionalLocations(input *model.LocationQuery, mainLocationsIds *[]int64) (*[]model.LocationEntity, error)
 }
 
 type repository struct {
 	conn *pgxpool.Pool
 }
 
-func NewRepositoryResult(conn *pgxpool.Pool) *repository {
+func CreateRepository(conn *pgxpool.Pool) *repository {
 	return &repository{conn: conn}
 }
 
-func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error) {
+func (r *repository) GetMainLocations(input *model.LocationQuery) (*[]model.LocationEntity, error) {
 
 	var locationsResult []model.LocationEntity
 
-	sql := createQuery(POINTS)
+	sql := `
+		SELECT OSM_ID,
+		       AMENITY,
+				NAME,
+				SHOP,
+				SPORT,
+				PUBLIC_TRANSPORT,
+				TAGS,
+				WATER,
+				LANDUSE,
+				ST_AsText(ST_Transform(WAY, 4326)) AS COORDINATES
+		FROM PLACES
+		WHERE 
+			 (SHOP = $1
+							OR LEISURE = $1
+							OR PUBLIC_TRANSPORT = $1
+							OR AMENITY = $1
+							OR WATER = $1)
+			AND ($4 = 0 OR ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 3857), $4) = false)
+			AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 3857), $5)
+	`
 
+	start := time.Now()
 	rows, err := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
+	elapsed := time.Since(start)
+	log.Printf("Main locations.by.distance query took %s", elapsed)
 
 	if err != nil {
 		logrus.Error("Database error:", err.Error())
@@ -48,78 +72,51 @@ func (r *repository) PointLocationsRepository(input *LocationRequest) (*[]model.
 	return &locationsResult, nil
 }
 
-func (r *repository) PolygonLocationsRepository(input *LocationRequest) (*[]model.LocationEntity, error) {
+func (r *repository) GetAdditionalLocations(input *model.LocationQuery, mainLocationsIds *[]int64) (*[]model.LocationEntity, error) {
 
 	var locationsResult []model.LocationEntity
 
-	sql := createQuery(POLYGONS)
+	sql := `
+		SELECT P1.OSM_ID,
+			P1.AMENITY,
+			P1.NAME,
+			P1.SHOP,
+			P1.SPORT,
+			P1.PUBLIC_TRANSPORT,
+			P1.TAGS,
+			P1.WATER,
+			P1.LANDUSE,
+			ST_AsText(ST_Transform(P1.WAY, 4326)) AS COORDINATES
+		FROM PLACES P1
+		INNER JOIN PLACES P2
+		ON ST_DWITHIN(P1.WAY, P2.WAY, $1)
+		WHERE
+    			(P1.SHOP = $2
+						OR P1.LEISURE = $2
+						OR P1.PUBLIC_TRANSPORT = $2
+						OR P1.AMENITY = $2
+						OR P1.WATER = $2)
+		AND P2.OSM_ID = ANY ($3)`
 
-	rows, err := r.conn.Query(context.Background(), sql, input.Type, input.Longitude, input.Latitude, input.RadiusStart, input.RadiusEnd)
+	start := time.Now()
+	rows, err := r.conn.Query(context.Background(), sql, input.RadiusEnd, input.Type, *mainLocationsIds)
+	elapsed := time.Since(start)
+	log.Printf("Additional places query took %s", elapsed)
 
 	if err != nil {
-		logrus.Error("Database error: ", err.Error())
+		logrus.Error("Database error:", err.Error())
 		return nil, err
 	}
 
 	for rows.Next() {
 		location, err := pgx.RowToAddrOfStructByName[model.LocationEntity](rows)
 		if err != nil {
-			logrus.Error("Parsing database data error: ", err.Error())
+			logrus.Error("Parsing database data error:", err.Error())
 			return &locationsResult, err
 		}
 
 		locationsResult = append(locationsResult, *location)
 	}
 
-	return &locationsResult, err
+	return &locationsResult, nil
 }
-
-func createQuery(tableName TABLE) string {
-
-	var geometryColumn string
-
-	if tableName == POLYGONS {
-		geometryColumn = "ST_AsText(ST_PointN(ST_Exteriorring(ST_Transform(WAY, 4326)), 1)) AS COORDINATES"
-	} else {
-		geometryColumn = "ST_AsText(ST_Transform(WAY, 4326)) AS COORDINATES"
-	}
-
-	sql := fmt.Sprintf(`
-		SELECT AMENITY,
-			NAME,
-			SHOP,
-			SPORT,
-			PUBLIC_TRANSPORT,
-			TAGS,
-			WATER,
-			LANDUSE,
-			%s
-		FROM %s
-		WHERE HIGHWAY IS NULL
-			AND RAILWAY IS NULL
-			AND POWER IS NULL
-			AND BARRIER IS NULL
-			AND (BUILDING != 'garage'
-								AND BUILDING != 'apartments'
-								OR BUILDING IS NULL)
-			AND (LANDUSE != 'grass'
-								OR LANDUSE IS NULL)
-			AND (SHOP = $1
-								OR LEISURE = $1
-								OR PUBLIC_TRANSPORT = $1
-			         			OR AMENITY = $1
-								OR WATER = $1)
-			AND NOT ((NAME IS NULL OR NAME = '') AND (TAGS IS NULL OR TAGS = ''))
-			AND ($4 = 0 OR ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 3857), $4) = false)
-			AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 3857), $5)
-	`, geometryColumn, tableName)
-
-	return sql
-}
-
-type TABLE string
-
-const (
-	POINTS   TABLE = "PLANET_OSM_POINT"
-	POLYGONS TABLE = "PLANET_OSM_POLYGON"
-)
