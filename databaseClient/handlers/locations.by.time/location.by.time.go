@@ -1,4 +1,4 @@
-package locations_by_time
+package locationsTimeHandler
 
 import (
 	resultLocation "databaseClient/controllers/locations"
@@ -34,9 +34,5 @@ func (h *Handler) GetLocationsByTime(ctx *gin.Context) {
 		return
 	}
 
-	if len(*locations.MainLocations) == 0 {
-		util.APIResponse(ctx, http.StatusNotFound, []model.LocationEntity{})
-	} else {
-		util.APIResponse(ctx, http.StatusOK, locations)
-	}
+	util.APIResponse(ctx, http.StatusOK, locations)
 }

@@ -1,4 +1,4 @@
-package locationsHandler
+package locationsDistanceHandler
 
 import (
 	"databaseClient/config"

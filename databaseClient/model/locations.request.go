@@ -14,14 +14,14 @@ type LocationByDistanceRequestDetails struct {
 }
 
 type LocationByTimeRequest struct {
-	Latitude      *float64                          `json:"latitude" binding:"required"`
-	Longitude     *float64                          `json:"longitude" binding:"required"`
-	MainLocation  *LocationByTimeRequestDetails     `json:"mainLocation" binding:"required"`
-	OtherLocation *LocationByDistanceRequestDetails `json:"otherLocation" binding:"omitempty"`
+	Latitude           *float64                          `json:"latitude" binding:"required"`
+	Longitude          *float64                          `json:"longitude" binding:"required"`
+	MainLocation       *LocationByTimeRequestDetails     `json:"mainLocation" binding:"required"`
+	AdditionalLocation *LocationByDistanceRequestDetails `json:"additionalLocation" binding:"omitempty"`
 }
 
 type LocationByTimeRequestDetails struct {
-	Type      *string  `json:"type" binding:"required"`
-	TimeStart *float64 `json:"timeStart" binding:"min=0"`
-	TimeEnd   *float64 `json:"timeEnd" binding:"required,max=10000"`
+	Type      *string `json:"type" binding:"required"`
+	TimeStart *int64  `json:"timeStart" binding:"min=0"`
+	TimeEnd   *int64  `json:"timeEnd" binding:"required,max=10000"`
 }
