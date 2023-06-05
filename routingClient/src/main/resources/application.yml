@@ -1,3 +1,6 @@
 server:
   port: 8081
 
+app:
+  osmFilePath: "/Users/erykmroczko/Downloads/mazowieckie-latest.osm.pbf"
+  graphHopperCachePath: "target/routing-graph-cache"

@@ -9,11 +9,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GraphHopperConfiguration {
 
+    private ConfigProperties configProperties;
+
     @Bean
     public GraphHopper create() {
         GraphHopper hopper = new GraphHopper();
-        hopper.setOSMFile("/Users/erykmroczko/Downloads/mazowieckie-latest.osm.pbf");
-        hopper.setGraphHopperLocation("target/routing-graph-cache");
+        hopper.setOSMFile(configProperties.getOsmFilePath());
+        hopper.setGraphHopperLocation(configProperties.getGraphHopperCachePath());
         hopper.setProfiles(new Profile("car").setVehicle("car").setWeighting("fastest").setTurnCosts(false));
         hopper.getCHPreparationHandler().setCHProfiles(new CHProfile("car"));
         hopper.importOrLoad();
