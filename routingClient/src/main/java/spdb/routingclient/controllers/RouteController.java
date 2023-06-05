@@ -29,6 +29,7 @@ public class RouteController {
 
     @PostMapping(path = "/getRouteData")
     public ResponseEntity<List<LocationRouteDetails>> getRouteData(@RequestBody RouteTimesRequest request) {
+        log.info("Route times request");
         return ResponseEntity.ok(routeService.calculateTimes(request));
     }
 

@@ -5,8 +5,8 @@ import (
 	"databaseClient/config"
 	"databaseClient/model"
 	"encoding/json"
+	"fmt"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
 	"math"
 	"net/http"
 )
@@ -111,15 +111,15 @@ func (s *service) GetLocationsByDistance(request *model.LocationByDistanceReques
 
 func (s *service) GetLocationsByTime(request *model.LocationByTimeRequest) (*model.PagedLocation, error) {
 
-	var radiusStart = float64(*request.MainLocation.TimeStart * 1000)
-	var radiusEnd = float64(*request.MainLocation.TimeEnd * 1000)
+	var radiusStart = float64(*request.MainLocation.TimeStart * 600)
+	var radiusEnd = float64(*request.MainLocation.TimeEnd * 600)
 
 	mainLocationsQueryData := optimizeDistanceQueryParameters(&radiusStart, &radiusEnd)
 	mainLocationsQueryData.Type = *request.MainLocation.Type
 
 	var pagedResults model.PagedLocation
 	var mainLocationsIds []int64
-	mainLocations := make(map[*int64]*model.Location)
+	mainLocations := make(map[int64]*model.Location)
 
 	for mainLocationsQueryData.RadiusEnd <= radiusEnd {
 		mainLocationsQueryData.Longitude = *request.Longitude
@@ -152,7 +152,7 @@ func (s *service) GetLocationsByTime(request *model.LocationByTimeRequest) (*mod
 				Name:         loc.Name,
 				LocationType: &locationType,
 			}
-			mainLocations[loc.Osm_Id] = &location
+			mainLocations[*loc.Osm_Id] = &location
 			mainLocationsIds = append(mainLocationsIds, *loc.Osm_Id)
 		}
 
@@ -182,14 +182,14 @@ func (s *service) GetLocationsByTime(request *model.LocationByTimeRequest) (*mod
 		var checkedMainLocations []model.Location
 
 		for _, loc := range *locationsTimes {
-			if slices.Contains(mainLocationsIds, *loc.LocationDetails.Id) {
-				if *loc.Time > *request.MainLocation.TimeEnd {
-					checkedMainLocations = append(checkedMainLocations, model.Location{
-						Coordinates:  loc.LocationDetails.Coordinates,
-						Name:         mainLocations[loc.LocationDetails.Id].Name,
-						LocationType: mainLocations[loc.LocationDetails.Id].LocationType,
-					})
-				}
+			fmt.Println(*loc.LocationDetails.Id)
+			if *loc.Time > *request.MainLocation.TimeEnd {
+				fmt.Println(mainLocations[*loc.LocationDetails.Id])
+				checkedMainLocations = append(checkedMainLocations, model.Location{
+					Coordinates:  loc.LocationDetails.Coordinates,
+					Name:         mainLocations[*loc.LocationDetails.Id].Name,
+					LocationType: mainLocations[*loc.LocationDetails.Id].LocationType,
+				})
 			}
 		}
 
@@ -220,13 +220,13 @@ func (s *service) GetLocationsByTime(request *model.LocationByTimeRequest) (*mod
 	return &pagedResults, nil
 }
 
-func getTimeToLocations(sourceLatitude *float64, sourceLongitude *float64, locationsWithId *map[*int64]*model.Location) (*[]model.LocationsTimes, error) {
+func getTimeToLocations(sourceLatitude *float64, sourceLongitude *float64, locationsWithId *map[int64]*model.Location) (*[]model.LocationsTimes, error) {
 
 	var possibleLocationsCoordinates []model.PossibleLocationDetails
 
 	for id, loc := range *locationsWithId {
 		possibleLocationsCoordinates = append(possibleLocationsCoordinates, model.PossibleLocationDetails{
-			Id:          id,
+			Id:          &id,
 			Coordinates: loc.Coordinates,
 		})
 	}
