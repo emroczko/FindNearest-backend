@@ -1,12 +1,13 @@
-package locationsHandler
+package locationsDistanceHandler
 
 import (
-	"databaseClient/config"
 	resultLocation "databaseClient/controllers/locations"
 	"databaseClient/model"
 	"databaseClient/util"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/exp/slices"
 	"net/http"
 )
 
@@ -29,8 +30,18 @@ func (h *Handler) GetLocationsByDistance(ctx *gin.Context) {
 		return
 	}
 
-	logrus.Info("Request: ", *input.Latitude, *input.Longitude, *input.MainLocation.Type)
-	locations, err := h.service.GetLocationsByDistance(input)
+	if resolveMeanOfTransport(input.MeanOfTransport) == false {
+		util.CreateErrorResponse(ctx, http.StatusBadRequest, errors.New("not allowed mean of transport"))
+		return
+	}
+
+	logrus.Info("Request: ",
+		" latitude: ", *input.Latitude,
+		" longitude: ", *input.Longitude,
+		" type: ", *input.MainLocation.Type,
+		" mean of transport: ", *input.MeanOfTransport)
+	
+	locations, err := h.service.GetLocationsByRadius(input)
 
 	if err != nil {
 		logrus.Error(err)
@@ -41,11 +52,7 @@ func (h *Handler) GetLocationsByDistance(ctx *gin.Context) {
 	util.APIResponse(ctx, http.StatusOK, locations)
 }
 
-func resolveLocationType(requestLocationType string) string {
-	for _, locationType := range config.LocationsTypesConfig.LocationTypes {
-		if requestLocationType == locationType {
-			return locationType
-		}
-	}
-	return ""
+func resolveMeanOfTransport(requestLocationType *string) bool {
+	allowedMeansOfTransport := []string{"car", "foot", "bike"}
+	return slices.Contains(allowedMeansOfTransport, *requestLocationType)
 }

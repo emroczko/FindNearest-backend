@@ -12,6 +12,7 @@ require (
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/sirupsen/logrus v1.9.2
 	github.com/spf13/viper v1.15.0
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 )
 
 require (

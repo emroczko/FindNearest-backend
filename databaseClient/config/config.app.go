@@ -16,6 +16,8 @@ type Config struct {
 	DBUser     string `mapstructure:"DB_PSQL_USERNAME"`
 	DBPassword string `mapstructure:"DB_PSQL_PASSWORD"`
 	DBDatabase string `mapstructure:"DB_PSQL_DATABASE"`
+
+	RouteServiceUri string `mapstructure:"ROUTE_SERVICE_URI"`
 }
 
 func InitializeAppConfig() error {
@@ -39,23 +41,3 @@ func InitializeAppConfig() error {
 
 	return nil
 }
-
-//func GetFromEnv() error {
-//
-//	AppConfig.Host = util.GetEnv("GO_HOST")
-//	AppConfig.Port = util.GetEnv("GO_PORT")
-//	AppConfig.Environment = util.GetEnv("GO_PORT")
-//
-//	AppConfig.DBHost = util.GetEnv("DB_PSQL_HOST")
-//	AppConfig.DBPort = util.GetEnv("DB_PSQL_PORT")
-//	AppConfig.DBUser = util.GetEnv("DB_PSQL_USERNAME")
-//	AppConfig.DBPassword = util.GetEnv("DB_PSQL_PASSWORD")
-//	AppConfig.DBDatabase = util.GetEnv("DB_PSQL_DATABASE")
-//
-//	validate = validator.New()
-//
-//	err := validate.Struct(AppConfig)
-//	if err != nil {
-//		return err
-//	}
-//}
