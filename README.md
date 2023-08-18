@@ -1,18 +1,28 @@
-# FindNearMe
+# FindNearest
+> Backend side of an application which allows to search for places in given radius (distance or time) and to find another places in given radius from previous. 
 
-## TODO 
+## Table of contents
+* [General info](#general-info)
+* [Setup](#setup)
+* [Technologies](#technologies)
+* [Instruction](#instruction)
+* [Tests](#tests)
+* [Contact](#contact)
 
-### logika databaseClienta (który jest de facto też input serwisem):
+## General info
 
-1. Logika inputu, czyli co user może wrzucić (np. typ sklepu, trzeba to sparsować i odpowiednio wrzucić odpowiednie zapytanie do bazy danych) 
+TODO
 
-2. Oddzielenie modelu bazy danych od zwracanego modelu; docelowo w odpowiedzi z tego serwisu ma być tablica obiektów z polami:
+## Setup
 
-objectType
-objectName
-objectInfo (optional)
-distance 
-distanceToOtherObject
-time
-timeToOtherObject
-ewentualnie route to other object, a jeśli serwis w Javie będzie szybki to i route to object
+TODO
+
+## Technologies
+
+TODO
+
+## Instruction
+
+TODO
+
+## Tests
