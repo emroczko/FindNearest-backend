@@ -50,7 +50,7 @@ public class RouteService {
         return Route.builder().coordinates(coordinates).distance(distance).time(timeInMs).build();
     }
 
-    public List<LocationRouteDetails> calculateTimes(RouteTimesRequest routeRequest) {
+    public List<LocationRouteDetails> calculateDetails(RouteDetailsRequest routeRequest) {
 
         List<LocationRouteDetails> checkedLocations = new ArrayList<>();
         for (var location : routeRequest.getLocationsDetails()) {
@@ -60,7 +60,7 @@ public class RouteService {
                     location.getCoordinates().getLatitude(),
                     location.getCoordinates().getLongitude()
             )
-                    .setProfile("car")
+                    .setProfile(routeRequest.getMeanOfTransport())
                     .setLocale(Locale.US);
             var rsp = hopper.route(req);
 
@@ -68,7 +68,6 @@ public class RouteService {
                 throw new RuntimeException(rsp.getErrors().toString());
 
             var path = rsp.getBest();
-
             var distance = path.getDistance();
             var timeInMs = path.getTime();
 

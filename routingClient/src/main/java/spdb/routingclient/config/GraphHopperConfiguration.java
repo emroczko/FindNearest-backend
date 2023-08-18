@@ -18,8 +18,12 @@ public class GraphHopperConfiguration {
         GraphHopper hopper = new GraphHopper();
         hopper.setOSMFile(configProperties.getOsmFilePath());
         hopper.setGraphHopperLocation(configProperties.getGraphHopperCachePath());
-        hopper.setProfiles(new Profile("car").setVehicle("car").setWeighting("fastest").setTurnCosts(false));
-        hopper.getCHPreparationHandler().setCHProfiles(new CHProfile("car"));
+        hopper.setProfiles(new Profile("car").setVehicle("car").setWeighting("fastest").setTurnCosts(false),
+                new Profile("foot").setVehicle("foot").setWeighting("fastest").setTurnCosts(false),
+                new Profile("bike").setVehicle("bike").setWeighting("fastest").setTurnCosts(false));
+        hopper.getCHPreparationHandler().setCHProfiles(new CHProfile("car"),
+                new CHProfile("foot"),
+                new CHProfile("bike"));
         hopper.importOrLoad();
         return hopper;
     }

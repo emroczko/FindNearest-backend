@@ -10,9 +10,10 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @Builder
-public class RouteTimesRequest {
+public class RouteDetailsRequest {
     @NonNull
     private Coordinates sourceCoordinates;
     @NonNull
     private List<LocationsDetails> locationsDetails;
+    private String meanOfTransport;
 }

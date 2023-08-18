@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import spdb.routingclient.model.LocationRouteDetails;
 import spdb.routingclient.model.Route;
 import spdb.routingclient.model.RouteRequest;
-import spdb.routingclient.model.RouteTimesRequest;
+import spdb.routingclient.model.RouteDetailsRequest;
 import spdb.routingclient.services.RouteService;
 
 import java.util.List;
@@ -28,9 +28,9 @@ public class RouteController {
     }
 
     @PostMapping(path = "/getRouteData")
-    public ResponseEntity<List<LocationRouteDetails>> getRouteData(@RequestBody RouteTimesRequest request) {
-        log.info("Route times request");
-        return ResponseEntity.ok(routeService.calculateTimes(request));
+    public ResponseEntity<List<LocationRouteDetails>> getRouteData(@RequestBody RouteDetailsRequest request) {
+        log.info("Route details request for {} by {}", request.getSourceCoordinates(), request.getMeanOfTransport());
+        return ResponseEntity.ok(routeService.calculateDetails(request));
     }
 
 }

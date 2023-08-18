@@ -45,8 +45,8 @@ func (r *repository) GetMainLocations(input *model.LocationQuery) (*[]model.Loca
 							OR PUBLIC_TRANSPORT = $1
 							OR AMENITY = $1
 							OR WATER = $1)
-			AND ($4 = 0 OR ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 3857), $4) = false)
-			AND ST_DWITHIN(WAY, ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 3857), $5)
+			AND ($4 = 0 OR ST_DWITHIN(ST_Transform(WAY, 2180), ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 2180), $4) = false)
+			AND ST_DWITHIN(ST_Transform(WAY, 2180), ST_TRANSFORM(ST_SETSRID(ST_POINT($2, $3), 4326), 2180), $5)
 	`
 
 	start := time.Now()
@@ -89,17 +89,18 @@ func (r *repository) GetAdditionalLocations(input *model.LocationQuery, mainLoca
 			ST_AsText(ST_Transform(P1.WAY, 4326)) AS COORDINATES
 		FROM PLACES P1
 		INNER JOIN PLACES P2
-		ON ST_DWITHIN(P1.WAY, P2.WAY, $1)
+		ON ($1 = 0 OR ST_DWITHIN(ST_Transform(P1.WAY, 2180), ST_Transform(P2.WAY, 2180), $1) = false) 
+		       AND ST_DWITHIN(ST_Transform(P1.WAY, 2180), ST_Transform(P2.WAY, 2180), $2)
 		WHERE
-    			(P1.SHOP = $2
-						OR P1.LEISURE = $2
-						OR P1.PUBLIC_TRANSPORT = $2
-						OR P1.AMENITY = $2
-						OR P1.WATER = $2)
-		AND P2.OSM_ID = ANY ($3)`
+    			(P1.SHOP = $3
+						OR P1.LEISURE = $3
+						OR P1.PUBLIC_TRANSPORT = $3
+						OR P1.AMENITY = $3
+						OR P1.WATER = $3)
+		AND P2.OSM_ID = ANY ($4)`
 
 	start := time.Now()
-	rows, err := r.conn.Query(context.Background(), sql, input.RadiusEnd, input.Type, *mainLocationsIds)
+	rows, err := r.conn.Query(context.Background(), sql, input.RadiusStart, input.RadiusEnd, input.Type, *mainLocationsIds)
 	elapsed := time.Since(start)
 	log.Printf("Additional places query took %s", elapsed)
 

@@ -2,5 +2,5 @@ server:
   port: 8081
 
 app:
-  osmFilePath: "/Users/erykmroczko/Downloads/mazowieckie-latest.osm.pbf"
-  graphHopperCachePath: "target/routing-graph-cache"
+  osmFilePath: ${OSM_FILE_PATH}
+  graphHopperCachePath: ${GRAPH_HOPPER_CACHE_PATH}
