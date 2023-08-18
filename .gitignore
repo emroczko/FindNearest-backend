@@ -1,9 +1,11 @@
 
 .DS_Store
-databaseClient/.idea
 routingClient/.idea
 routingClient/target
 routingClient/build
 routingClient/.gradle
+routingClient/env_file
+routingClient/osm
+databaseClient/.idea
 databaseClient/.env
 databaseClient/.env.docker

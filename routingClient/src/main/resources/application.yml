@@ -1,3 +1,6 @@
 server:
   port: 8081
 
+app:
+  osmFilePath: ${OSM_FILE_PATH}
+  graphHopperCachePath: ${GRAPH_HOPPER_CACHE_PATH}
